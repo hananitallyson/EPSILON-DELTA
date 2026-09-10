@@ -8,5 +8,5 @@ corresponding proximity radius δ > 0.
 ```
 
 ```bash
-0 < |𝒙 - 𝒂| < δ, then |f(𝒙) - 𝑳| < ε
+0 < |𝒙 – 𝒂| < δ, then |f(𝒙) – 𝑳| < ε
 ```
