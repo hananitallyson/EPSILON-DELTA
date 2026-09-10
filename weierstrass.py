@@ -26,21 +26,21 @@ def cauchy(f, a, L, epsilon=0.5):
     delta = 1.0
 
     for _ in range(100):
-        valid = True
+        counterexample = None
 
         for i in range(1, 1001):
             x = a + delta * i / 1000
 
-            if math.fabs(f(x) - L) >= epsilon:
-                valid = False
+            if x != a and math.fabs(f(x) - L) >= epsilon:
+                counterexample = x
                 break
 
-        if valid:
+        if counterexample is not None:
+            delta /= 2
+        else:
             return None
 
-        delta /= 2
-
-    return a
+    return counterexample
 
 f = lambda x: 2 * x
 g = lambda x: 1 if x >= 0 else -1
