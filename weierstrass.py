@@ -20,34 +20,3 @@ def weierstrass(f, a, L, epsilon=0.001):
         delta /= 2
 
     return False, None
-
-
-def cauchy(f, a, L, epsilon=0.5):
-    delta = 1.0
-
-    for _ in range(100):
-        counterexample = None
-
-        for i in range(1, 1001):
-            x = a + delta * i / 1000
-
-            if x != a and math.fabs(f(x) - L) >= epsilon:
-                counterexample = x
-                break
-
-        if counterexample is not None:
-            delta /= 2
-        else:
-            return None
-
-    return counterexample
-
-f = lambda x: 2 * x
-g = lambda x: 1 if x >= 0 else -1
-
-data = input("inputs (a L): ").split(" ")
-target = float(data[0]) 
-lim = float(data[1])
-
-print("limit exists:", weierstrass(f, target, lim), "| counterexample:", cauchy(g, target, lim))
-
