@@ -1,14 +1,79 @@
+import re
+import math
 from weierstrass import weierstrass
 
-if __name__ == "__main__":
-    f1 = lambda x: 2 * x
-    f1_str = "f(x) = 2*x"
-    valid1, delta1, counter1 = weierstrass(f1, a=1.0, L=2.0, epsilon=0.01)
-    status1 = "Valid" if valid1 else "Invalid"
-    print(f"\n({f1_str}, a = 1, L = 2, ε = 0.01) -> {status1} | δ: {delta1} | C.E.: {counter1}")
 
-    f2 = lambda x: abs(x) / x
-    f2_str = "f(x) = |x| / x"
-    valid2, delta2, counter2 = weierstrass(f2, a=0.0, L=1.0, epsilon=0.5)
-    status2 = "Valid" if valid2 else "Invalid"
-    print(f"({f2_str}, a = 0, L = 1, ε = 0.5) -> {status2} | δ: {delta2} | C.E.: {counter2}\n")
+def parse_expression(expr):
+    expr = re.sub(r"\|([^|]+)\|", r"abs(\1)", expr)
+
+    replacements = {
+        "sqrt": "sqrt",
+        "sen": "sin",
+        "sin": "sin",
+        "cos": "cos",
+        "tan": "tan",
+        "tg": "tan",
+        "asin": "asin",
+        "acos": "acos",
+        "atan": "atan",
+        "ln": "log",
+        "log": "log10",
+        "abs": "abs",
+        "exp": "exp",
+        "pi": "pi",
+        "e": "e",
+    }
+
+    for name, replacement in replacements.items():
+        expr = re.sub(
+            rf"\b{name}\b",
+            replacement,
+            expr
+        )
+
+    return expr
+
+
+if __name__ == "__main__":
+    while True:
+        data = input("\nEnter F(x) Eps Limit Tend (or 0 to exit): ").split()
+
+        if len(data) == 1 and data[0] == "0":
+            print("exit...\n")
+            break
+
+        f_str = data[0]
+        f_expr = parse_expression(f_str)
+
+        f = eval(
+            f"lambda x: {f_expr}",
+            {
+                "sqrt": math.sqrt,
+                "sin": math.sin,
+                "cos": math.cos,
+                "tan": math.tan,
+                "asin": math.asin,
+                "acos": math.acos,
+                "atan": math.atan,
+                "log": math.log,
+                "log10": math.log10,
+                "abs": abs,
+                "exp": math.exp,
+                "pi": math.pi,
+                "e": math.e,
+            }
+        )
+
+        eps = float(data[1])
+        L   = float(data[2])
+        a   = float(data[3])
+
+        valid, delta, counterexample = weierstrass(f, a, L, eps)
+
+        if valid:
+            print(f"delta = {delta}, i.e. {a - delta} < x < {a + delta} guarantees |{f_str} - {L}| < {eps}")
+        else:
+            if counterexample is not None:
+                print(f"[Refuted] x = {counterexample} violates |{f_str} - {L}| < {eps}")
+            else:
+                print("[Error] Delta not found.") 
