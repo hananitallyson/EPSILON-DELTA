@@ -1,13 +1,16 @@
-from weierstrass import weierstrass
+import math
 from cauchy import cauchy
+from weierstrass import weierstrass
 
+expr_str = input("\nEnter the expression for f(x) (use 'x' as the variable): ")
 
-f = lambda x: 2 * x
-g = lambda x: 1 if x >= 0 else -1
+f = lambda x: eval(expr_str, {"x": x, "math": math})
 
 data = input("inputs (a L): ").split(" ")
 target = float(data[0]) 
 lim = float(data[1])
 
-print("limit exists:", weierstrass(f, target, lim), "| counterexample:", cauchy(g, target, lim))
+valid, delta = weierstrass(f, target, lim)
+counterexample = cauchy(f, target, lim)
 
+print(f"valid: {valid} | delta: {delta} | counterexample: {counterexample}\n")
