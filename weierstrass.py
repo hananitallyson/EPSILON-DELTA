@@ -1,4 +1,4 @@
-def weierstrass(f, a, L, epsilon=0.01):
+def weierstrass(f, a, L, epsilon):
     delta = 1.0
     scan_steps = 500
 
