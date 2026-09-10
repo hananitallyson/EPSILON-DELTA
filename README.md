@@ -4,5 +4,9 @@
 A definição formal de limite (ou definição épsilon-delta)
 estabelece que o limite de uma função f(𝒙) quando 𝒙 tende
 a 𝒂 é igual a 𝑳 se, para cada tolerância ε > 0, existe um
-raio de proximidade δ > 0 correspondente
+raio de proximidade δ > 0 correspondente.
+```
+
+```bash
+0 < |𝒙 - 𝒂| < δ, então |f(𝒙) - 𝑳| < ε
 ```
