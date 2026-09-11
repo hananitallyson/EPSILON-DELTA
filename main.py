@@ -4,11 +4,8 @@ from weierstrass import weierstrass
 
 def parse_expression(expr):
     expr = expr.replace(" ", "")
-    
     expr = re.sub(r'\|([^|]+)\|', r'abs(\1)', expr)
-    
     expr = expr.replace("^", "**")
-    
     expr = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', expr)
     expr = re.sub(r'(\))([a-zA-Z0-9(])', r'\1*\2', expr)
     
@@ -57,7 +54,6 @@ if __name__ == "__main__":
                 continue
 
             f_expr = parse_expression(f_str)
-
             f = eval(f"lambda x: {f_expr}", {"__builtins__": {}, **safe_dict})
 
             eps = float(data[0])
@@ -71,18 +67,24 @@ if __name__ == "__main__":
             else:
                 a = float(a_str)
 
-            exists, limit_val = weierstrass(f, a, L, eps)
+            exists, result_val = weierstrass(f, a, L, eps)
 
             if exists:
                 if math.isinf(a):
                     sign = ">" if a > 0 else "<"
-                    m_val = limit_val if a > 0 else -limit_val
-                    print(f"M = \033[32m{limit_val}\033[0m, i.e. x {sign} \033[32m{m_val}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
+                    m_val = result_val if a > 0 else -result_val
+                    print(f"M = \033[32m{result_val}\033[0m, i.e. x {sign} \033[32m{m_val}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
                 else:
-                    delta = limit_val
+                    delta = result_val
                     print(f"delta = \033[32m{delta}\033[0m, i.e. \033[32m{a - delta}\033[0m < x < \033[32m{a + delta}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
             else:
-                print(f"epsilon = \033[32m{eps}\033[0m: no valid delta or M tested works for this epsilon.")
+                contraexample_x = result_val
+                try:
+                    fx_val = f(contraexample_x)
+                except Exception:
+                    fx_val = "undefined"
+
+                print(f"epsilon = \033[32m{eps}\033[0m, counter e.g: x = \033[32m{contraexample_x}\033[0m; \033[32m0\033[0m < |\033[32mx - {a}\033[0m| < delta; |\033[32m{f_str.replace('x', f'{contraexample_x}')} - {L}\033[0m| >= \033[32m{eps}\033[0m")
         
         except Exception as e:
             print(f"Error processing the expression: \033[32m{e}\033[0m")

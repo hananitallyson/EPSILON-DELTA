@@ -43,7 +43,7 @@ def weierstrass(f, a, L, epsilon):
     if math.isinf(a):
         return _weierstrass_infinity(f, a > 0, L, epsilon)
 
-    def is_valid_delta(test_delta, steps=1000):
+    def check_delta(test_delta, steps=1000):
         for i in range(steps, 0, -1):
             d = test_delta * i / steps
 
@@ -53,35 +53,44 @@ def weierstrass(f, a, L, epsilon):
                 try:
                     value = f(x)
                     if isinstance(value, complex) or math.isnan(value) or math.isinf(value):
-                        return False
+                        return False, x
 
                     if abs(value - L) >= epsilon:
-                        return False
+                        return False, x
 
                 except (ValueError, ZeroDivisionError, OverflowError, TypeError):
-                    return False
+                    return False, x
 
-        return True
+        return True, None
 
     low = 0.0
     high = 1.0
     
-    while is_valid_delta(high):
-        low = high
-        high *= 2
-        if high > 1e6:  
-            return True, high
+    valid, cx = check_delta(high)
+    
+    if valid:
+        while True:
+            valid, cx = check_delta(high)
+            if not valid:
+                break
+            low = high
+            high *= 2
+            if high > 1e6:  
+                return True, high
+    else:
+        pass
             
     precision = 1e-7
     while (high - low) > precision:
         mid = (low + high) / 2.0
-
-        if is_valid_delta(mid):
+        valid, _ = check_delta(mid)
+        if valid:
             low = mid  
         else:
             high = mid 
             
     if low < 1e-10:
-        return False, None
+        _, cx = check_delta(0.01)
+        return False, cx if cx is not None else (a + 0.001)
         
     return True, round(low, 6)
