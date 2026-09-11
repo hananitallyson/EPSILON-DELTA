@@ -5,7 +5,7 @@ def weierstrass(f, a, L, epsilon):
 
     for delta in deltas:
         valid = True
-        steps = 1000
+        steps = 10000
 
         for i in range(1, steps + 1):
             d = delta * (i / steps)
