@@ -18,7 +18,7 @@ delta = 0.001, i.e. 0.999 < x < 1.001 guarantees |2*x - 2.0| < 0.01
 ```
 
 ```bash
-Enter F(x) (or 0 to exit): |x|/x 
+Enter F(x) (or 0 to exit): |x|/x
 Enter Eps Limit Tend (separated by spaces): 0.01 1 0
-epsilon = 0.01: no delta tested works for this epsilon.
+epsilon = 0.01, counter e.g: x = -0.01; 0 < |x - 0.0| < delta; ||-0.01|/-0.01 - 1.0| >= 0.01
 ```
