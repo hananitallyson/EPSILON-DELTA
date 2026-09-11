@@ -58,18 +58,31 @@ if __name__ == "__main__":
 
             f_expr = parse_expression(f_str)
 
-            f = eval(f"lambda x: {f_expr}", {"__builtins__": None}, safe_dict)
+            f = eval(f"lambda x: {f_expr}", {"__builtins__": {}, **safe_dict})
 
             eps = float(data[0])
             L   = float(data[1])
-            a   = float(data[2])
+            
+            a_str = data[2].lower()
+            if a_str in ['inf', '+inf']:
+                a = float('inf')
+            elif a_str == '-inf':
+                a = float('-inf')
+            else:
+                a = float(a_str)
 
-            exists, delta = weierstrass(f, a, L, eps)
+            exists, limit_val = weierstrass(f, a, L, eps)
 
             if exists:
-                print(f"delta = \033[32m{delta}\033[0m, i.e. \033[32m{a - delta}\033[0m < x < \033[32m{a + delta}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
+                if math.isinf(a):
+                    sign = ">" if a > 0 else "<"
+                    m_val = limit_val if a > 0 else -limit_val
+                    print(f"M = \033[32m{limit_val}\033[0m, i.e. x {sign} \033[32m{m_val}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
+                else:
+                    delta = limit_val
+                    print(f"delta = \033[32m{delta}\033[0m, i.e. \033[32m{a - delta}\033[0m < x < \033[32m{a + delta}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
             else:
-                print(f"epsilon = \033[32m{eps}\033[0m: no delta tested works for this epsilon.") 
-
+                print(f"epsilon = \033[32m{eps}\033[0m: no valid delta or M tested works for this epsilon.")
+        
         except Exception as e:
             print(f"Error processing the expression: \033[32m{e}\033[0m")
