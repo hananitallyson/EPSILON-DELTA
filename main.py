@@ -3,12 +3,12 @@ import math
 import re
 from weierstrass import weierstrass
 
-def parse_expression(expr):
-    expr = expr.replace(" ", "")
-    expr = re.sub(r'\|([^|]+)\|', r'abs(\1)', expr)
-    expr = expr.replace("^", "**")
-    expr = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', expr)
-    expr = re.sub(r'(\))([a-zA-Z0-9(])', r'\1*\2', expr)
+def clean_expression(expression):
+    expression = expression.replace(" ", "")
+    expression = re.sub(r'\|([^|]+)\|', r'abs(\1)', expression)
+    expression = expression.replace("^", "**")
+    expression = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', expression)
+    expression = re.sub(r'(\))([a-zA-Z0-9(])', r'\1*\2', expression)
     
     replacements = {
         r'\bsen\b': 'sin',
@@ -18,12 +18,12 @@ def parse_expression(expr):
     }
     
     for pattern, replacement in replacements.items():
-        expr = re.sub(pattern, replacement, expr)
+        expression = re.sub(pattern, replacement, expression)
 
-    return expr
+    return expression
 
 if __name__ == "__main__":
-    safe_dict = {
+    math_functions = {
         "sqrt": math.sqrt,
         "sin": math.sin,
         "cos": math.cos,
@@ -43,54 +43,37 @@ if __name__ == "__main__":
 
     while True:
         try:
-            f_str = input("\nenter F(x) (0 exit, - clear): ").strip()
+            func_text = input("\nEnter F(x) (0 to exit, - to clear): ").strip()
             
-            if f_str == "0":
-                print("exit...\n")
+            if func_text == "0":
+                print("Exiting...\n")
                 break
-            if f_str == "-":
+            if func_text == "-":
                 os.system("cls" if os.name == "nt" else "clear")
                 continue
                 
-            data_str = input("enter Eps Limit Tend (separated by spaces): ").strip()
-            data = data_str.split()
+            data_text = input("Enter Eps, Limit, and Tendency (space-separated): ").strip()
+            data_list = data_text.split()
             
-            if len(data) != 3:
-                print("invalid format. please enter exactly 3 space-separated values for Eps, Limit, and Tend.")
+            if len(data_list) != 3:
+                print("Invalid format. Please enter exactly 3 space-separated values.")
                 continue
 
-            f_expr = parse_expression(f_str)
-            f = eval(f"lambda x: {f_expr}", {"__builtins__": {}, **safe_dict})
+            ready_expression = clean_expression(func_text)
+            func = eval(f"lambda x: {ready_expression}", {"__builtins__": {}, **math_functions})
 
-            eps = float(data[0])
-            L   = float(data[1])
-            
-            a_str = data[2].lower()
-            if a_str in ['inf', '+inf']:
-                a = float('inf')
-            elif a_str == '-inf':
-                a = float('-inf')
+            epsilon = float(data_list[0])
+            limit_val = float(data_list[1])
+            point_a = float(data_list[2])
+
+            delta_exists, result = weierstrass(func, point_a, limit_val, epsilon)
+
+            if delta_exists:
+                delta = result
+                print(f"delta = \033[32m{delta}\033[0m, i.e., \033[32m{point_a - delta}\033[0m < x < \033[32m{point_a + delta}\033[0m guarantees |\033[32m{func_text} - {limit_val}\033[0m| < \033[32m{epsilon}\033[0m")
             else:
-                a = float(a_str)
-
-            exists, result_val = weierstrass(f, a, L, eps)
-
-            if exists:
-                if math.isinf(a):
-                    sign = ">" if a > 0 else "<"
-                    m_val = result_val if a > 0 else -result_val
-                    print(f"M = \033[32m{result_val}\033[0m, i.e. x {sign} \033[32m{m_val}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
-                else:
-                    delta = result_val
-                    print(f"delta = \033[32m{delta}\033[0m, i.e. \033[32m{a - delta}\033[0m < x < \033[32m{a + delta}\033[0m guarantees |\033[32m{f_str} - {L}\033[0m| < \033[32m{eps}\033[0m")
-            else:
-                contraexample_x = result_val
-                try:
-                    fx_val = f(contraexample_x)
-                except Exception:
-                    fx_val = "undefined"
-
-                print(f"epsilon = \033[32m{eps}\033[0m, counter e.g: x = \033[32m{contraexample_x}\033[0m; \033[32m0\033[0m < |\033[32mx - {a}\033[0m| < delta; |\033[32m{f_str.replace('x', f'{contraexample_x}')} - {L}\033[0m| >= \033[32m{eps}\033[0m")
+                counter_example_x = result
+                print(f"epsilon = \033[32m{epsilon}\033[0m, counter e.g: x = \033[32m{counter_example_x}\033[0m; \033[32m0\033[0m < |\033[32mx - {point_a}\033[0m| < delta; |\033[32m{func_text.replace('x', f'{counter_example_x}')} - {limit_val}\033[0m| >= \033[32m{epsilon}\033[0m")
         
-        except Exception as e:
-            print(f"error processing the expression: \033[32m{e}\033[0m")
+        except Exception as error:
+            print(f"Error processing expression: \033[32m{error}\033[0m")
