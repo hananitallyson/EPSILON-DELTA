@@ -1,48 +1,37 @@
+import math
+
 def weierstrass(f, a, L, epsilon):
-    delta = 1.0
-    min_delta = 1e-5
+    deltas = [1.0, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001, 0.00005, 0.00001]
 
-    while delta >= min_delta:
+    for delta in deltas:
         valid = True
-        counterexample = None
+        steps = 1000
 
-        for i in range(1, 10001):
-            d = delta * (i / 10000)
+        for i in range(1, steps + 1):
+            d = delta * (i / steps)
 
             for sign in (-1, 1):
                 x = a + sign * d
 
                 try:
                     value = f(x)
+                    
+                    if isinstance(value, complex) or math.isnan(value) or math.isinf(value):
+                        valid = False
+                        break
 
                     if abs(value - L) >= epsilon:
                         valid = False
-                        counterexample = x
                         break
 
-                except (ValueError, ZeroDivisionError, OverflowError):
+                except (ValueError, ZeroDivisionError, OverflowError, TypeError):
                     valid = False
-                    counterexample = x
                     break
 
             if not valid:
                 break
 
         if valid:
-            return True, round(delta, 5), None
+            return True, delta
 
-        # Diminui delta
-        if delta > 0.1:
-            delta -= 0.1
-        elif delta > 0.01:
-            delta -= 0.01
-        elif delta > 0.001:
-            delta -= 0.001
-        elif delta > 0.0001:
-            delta -= 0.0001
-        else:
-            delta -= 0.00001
-
-        delta = round(delta, 5)
-
-    return False, None, counterexample
+    return False, None

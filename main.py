@@ -1,11 +1,8 @@
-import re
 import math
 from weierstrass import weierstrass
 
 
 def parse_expression(expr):
-    expr = re.sub(r"\|([^|]+)\|", r"abs(\1)", expr)
-
     replacements = {
         "sqrt": "sqrt",
         "sen": "sin",
@@ -25,11 +22,8 @@ def parse_expression(expr):
     }
 
     for name, replacement in replacements.items():
-        expr = re.sub(
-            rf"\b{name}\b",
-            replacement,
-            expr
-        )
+        if name in expr:
+            expr = expr.replace(name, replacement)
 
     return expr
 
@@ -68,12 +62,9 @@ if __name__ == "__main__":
         L   = float(data[2])
         a   = float(data[3])
 
-        valid, delta, counterexample = weierstrass(f, a, L, eps)
+        exists, delta = weierstrass(f, a, L, eps)
 
-        if valid:
+        if exists:
             print(f"delta = {delta}, i.e. {a - delta} < x < {a + delta} guarantees |{f_str} - {L}| < {eps}")
         else:
-            if counterexample is not None:
-                print(f"[Refuted] x = {counterexample} violates |{f_str} - {L}| < {eps}")
-            else:
-                print("[Error] Delta not found.") 
+            print(f"epsilon = {eps}: no delta tested works for this epsilon.")
