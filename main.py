@@ -1,3 +1,4 @@
+import os
 import math
 import re
 from weierstrass import weierstrass
@@ -38,19 +39,24 @@ if __name__ == "__main__":
         "e": math.e,
     }
 
+    os.system("cls" if os.name == "nt" else "clear")
+
     while True:
         try:
-            f_str = input("\nEnter F(x) (or 0 to exit): ").strip()
+            f_str = input("\nenter F(x) (0 exit, - clear): ").strip()
             
             if f_str == "0":
                 print("exit...\n")
                 break
+            if f_str == "-":
+                os.system("cls" if os.name == "nt" else "clear")
+                continue
                 
-            data_str = input("Enter Eps Limit Tend (separated by spaces): ").strip()
+            data_str = input("enter Eps Limit Tend (separated by spaces): ").strip()
             data = data_str.split()
             
             if len(data) != 3:
-                print("Invalid format. Please enter exactly 3 space-separated values for Eps, Limit, and Tend.")
+                print("invalid format. please enter exactly 3 space-separated values for Eps, Limit, and Tend.")
                 continue
 
             f_expr = parse_expression(f_str)
@@ -87,4 +93,4 @@ if __name__ == "__main__":
                 print(f"epsilon = \033[32m{eps}\033[0m, counter e.g: x = \033[32m{contraexample_x}\033[0m; \033[32m0\033[0m < |\033[32mx - {a}\033[0m| < delta; |\033[32m{f_str.replace('x', f'{contraexample_x}')} - {L}\033[0m| >= \033[32m{eps}\033[0m")
         
         except Exception as e:
-            print(f"Error processing the expression: \033[32m{e}\033[0m")
+            print(f"error processing the expression: \033[32m{e}\033[0m")
